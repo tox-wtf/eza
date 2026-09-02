@@ -208,7 +208,7 @@ impl<'dir> File<'dir> {
         };
 
         if total_size {
-            file.recursive_size = file.recursive_directory_size(DotFilter::DotfilesAndDots);
+            file.recursive_size = file.recursive_directory_size(DotFilter::Dotfiles);
         }
 
         file
@@ -684,7 +684,10 @@ impl<'dir> File<'dir> {
             Dir::read_dir(self.path.clone()).map_or(RecursiveSize::Unknown, |dir| {
                 let mut size = 0;
                 let mut blocks = 0;
-                for file in dir.files(dotfilter, None, false, false, true) {
+                for file in dir
+                    .files(dotfilter, None, false, false, true)
+                    .filter(|f| !f.is_all_all)
+                {
                     match file.recursive_directory_size(dotfilter) {
                         RecursiveSize::Some(bytes, blks) => {
                             size += bytes;
